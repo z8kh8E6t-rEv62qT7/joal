@@ -31,6 +31,63 @@ In the folder of your choice (ie: /home/anthony/joal-conf), download the [latest
 It must look similar to this:<br/>
 ![joal-conf][joal-conf-folder]
 
+## Build and run a macOS ARM64 native executable
+
+This checkout targets **Java 21 and Spring Boot 3.5.16**. Install a GraalVM distribution for Java 21, Maven 3.6.3 or later, and the Xcode command-line tools. On a Mac with GraalVM installed in the standard location:
+
+```sh
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/graalvm-21.jdk/Contents/Home
+export PATH="$JAVA_HOME/bin:$PATH"
+mvn clean test
+mvn -Pnative native:compile
+```
+
+The executable is `target/jack-of-all-trades`. It runs directly, without `java -jar`, on macOS ARM64. It is not a Linux or Intel Mac executable. The build leaves the existing `build/` directory untouched. A JVM JAR can also be built with `mvn package`.
+
+Log4j2 is pinned to 2.25.5 because it supplies GraalVM metadata missing from the version managed by Boot 3.5. JOAL adds metadata for its JSON models, UI resources, and Boot's logging plugins. Adding a new polymorphic JSON implementation or outgoing message requires updating `JoalRuntimeHints` and exercising that path in the executable.
+
+Use an existing configuration directory containing `config.json`, `clients/`, and `torrents/`:
+
+```sh
+# Background mode: no HTTP listener and no UI credentials required.
+./target/jack-of-all-trades --joal-conf="/absolute/path/to/joal-conf"
+
+# The same executable with Web UI enabled.
+./target/jack-of-all-trades \
+  --joal-conf="/absolute/path/to/joal-conf" \
+  --spring.main.web-environment=true \
+  --server.port=8088 \
+  --joal.ui.path.prefix=YourSecretPath123 \
+  --joal.ui.secret-token=YourSecretToken
+```
+
+Open `http://localhost:8088/YourSecretPath123/ui/`. The UI flag is read at process startup, defaults to false, and controls HTTP listening while retaining one AOT-compatible Spring Web context. Changing the flag, port, configuration directory, prefix, or token requires a restart, not a rebuild. When the UI is disabled, setting `server.port` does not enable HTTP. The BitTorrent peer listener continues to operate independently.
+
+An enabled UI requires a nonempty alphanumeric prefix and a nonblank token. Requests outside the prefix receive an empty 404 response; authorization denies other unexposed routes. Missing or malformed startup configuration produces a nonzero exit. Stop with Ctrl-C for graceful cleanup.
+
+Console logging uses blue timestamps, severity-colored levels, magenta thread names and cyan logger names; message text retains the terminal's default color. Tomcat's JUL logs are routed through the same Log4j2 appender. The bundled `log4j2.xml` emits ANSI colors directly, so no additional startup flag is required. To customize the format without rebuilding, supply an external Log4j2 XML file using `--logging.config=/absolute/path/to/log4j2.xml`.
+
+For a native process, pass proxy system properties directly instead of using `JAVA_TOOL_OPTIONS`:
+
+```sh
+./target/jack-of-all-trades -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=8888 \
+  --joal-conf="/absolute/path/to/joal-conf"
+```
+
+### Executable acceptance tests
+
+After building, run the black-box suite against the actual artifact:
+
+```sh
+mvn -Dtest=ApplicationProcessTest -Djoal.test.application=target/jack-of-all-trades test
+# Optionally run the same suite against the JVM JAR:
+mvn -Dtest=ApplicationProcessTest -Djoal.test.application=target/jack-of-all-trades-2.1.38-SNAPSHOT.jar test
+```
+
+The suite creates temporary configuration directories, exercises bundled client files, UI access, STOMP authentication and JSON messages, configuration writes, local HTTP/HTTPS tracker announcements, a runtime TLS trust store, file watching, invalid inputs, and shutdown. Outbound HTTP requests terminate at a local test proxy; no real trackers or personal seed directories are used. Without `joal.test.application`, these process tests are skipped by the normal unit-test run.
+
+**Docker and CI are outside this native adaptation:** their existing Java 11 configuration has not been migrated and is not compatible with this checkout's Java 21 requirement. The Docker examples below describe the upstream distribution.
+
 ## 2. Run with Java
 
 ```

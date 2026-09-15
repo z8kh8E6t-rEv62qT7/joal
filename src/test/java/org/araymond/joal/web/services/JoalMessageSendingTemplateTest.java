@@ -14,9 +14,18 @@ import static org.mockito.Mockito.*;
 public class JoalMessageSendingTemplateTest {
 
     @Test
+    public void shouldNotSendWhenUiIsDisabled() {
+        final SimpMessageSendingOperations sendingOperations = mock(SimpMessageSendingOperations.class);
+        final JoalMessageSendingTemplate template = new JoalMessageSendingTemplate(sendingOperations,
+                new org.araymond.joal.web.config.WebUiSettings(false, "", "", false));
+        template.convertAndSend("/test", new GlobalSeedStoppedPayload());
+        verifyNoInteractions(sendingOperations);
+    }
+
+    @Test
     public void shouldWrapMessageAndSend() {
         final SimpMessageSendingOperations sendingOperations = mock(SimpMessageSendingOperations.class);
-        final JoalMessageSendingTemplate joalMessageSendingTemplate = new JoalMessageSendingTemplate(sendingOperations);
+        final JoalMessageSendingTemplate joalMessageSendingTemplate = new JoalMessageSendingTemplate(sendingOperations, new org.araymond.joal.web.config.WebUiSettings(true, "test", "test-token", false));
 
         final GlobalSeedStoppedPayload payload = new GlobalSeedStoppedPayload();
         joalMessageSendingTemplate.convertAndSend("/test", payload);

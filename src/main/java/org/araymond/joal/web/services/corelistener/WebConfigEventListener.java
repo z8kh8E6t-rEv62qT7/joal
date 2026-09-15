@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.araymond.joal.core.events.config.ConfigHasBeenLoadedEvent;
 import org.araymond.joal.core.events.config.ConfigurationIsInDirtyStateEvent;
 import org.araymond.joal.core.events.config.ListOfClientFilesEvent;
-import org.araymond.joal.web.annotations.ConditionalOnWebUi;
 import org.araymond.joal.web.messages.outgoing.impl.config.ConfigHasBeenLoadedPayload;
 import org.araymond.joal.web.messages.outgoing.impl.config.ConfigIsInDirtyStatePayload;
 import org.araymond.joal.web.messages.outgoing.impl.config.ListOfClientFilesPayload;
@@ -14,12 +13,11 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Created by raymo on 08/07/2017.
  */
-@ConditionalOnWebUi
 @Service
 @Slf4j
 public class WebConfigEventListener extends WebEventListener {

@@ -1,26 +1,24 @@
 package org.araymond.joal.web.config.obfuscation;
 
-import org.apache.http.NoHttpResponseException;
 import org.araymond.joal.TestConstant;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.ResourceAccessException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 @SpringBootTest(
         classes = {
+                org.araymond.joal.web.config.WebUiSettings.class,
                 AbortNonPrefixedRequestFilter.class,
                 org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration.class,
                 org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration.class,
@@ -34,6 +32,7 @@ import static org.assertj.core.api.Assertions.fail;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "spring.main.web-environment=true",
+                "joal.ui.secret-token=test-token",
                 "joal.ui.path.prefix=" + TestConstant.UI_PATH_PREFIX
         }
 )
@@ -62,16 +61,12 @@ public class AbortNonPrefixedRequestFilterTest {
     }
 
     @Test
-    public void shouldHaveNoResponseFromUnprefixedRequest() {
-        try {
+    public void shouldRejectUnprefixedRequest() {
             final ResponseEntity<String> response = this.restTemplate.getForEntity(
                     "http://localhost:" + port + "/hello",
                     String.class
             );
-            fail("shouldn't have had a response");
-        } catch (final ResourceAccessException e) {
-            assertThat(e).hasCauseInstanceOf(NoHttpResponseException.class);
-        }
+            assertThat(response.getStatusCode().value()).isEqualTo(404);
     }
 
     @Test

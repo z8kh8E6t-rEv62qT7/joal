@@ -8,7 +8,7 @@ import org.araymond.joal.core.SeedManager;
 import org.araymond.joal.core.client.emulated.generator.numwant.NumwantProvider;
 import org.araymond.joal.core.config.JoalConfigProvider;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;

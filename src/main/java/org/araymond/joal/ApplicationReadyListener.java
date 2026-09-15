@@ -4,11 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.araymond.joal.core.SeedManager;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Created by raymo on 08/07/2017.
@@ -18,12 +17,10 @@ import javax.inject.Inject;
 @Slf4j
 public class ApplicationReadyListener implements ApplicationListener<ApplicationReadyEvent> {
     private final SeedManager manager;
-    private final ConfigurableApplicationContext applicationContext;
 
     @Inject
-    public ApplicationReadyListener(final SeedManager manager, final ConfigurableApplicationContext applicationContext) {
+    public ApplicationReadyListener(final SeedManager manager) {
         this.manager = manager;
-        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -31,10 +28,10 @@ public class ApplicationReadyListener implements ApplicationListener<Application
         try {
             manager.init();
             manager.startSeeding();
-        } catch (final Throwable e) {
-            final IllegalStateException wrapped = new IllegalStateException("Fatal error encountered", e);
-            log.error("Fatal error encountered", wrapped);
-            applicationContext.close();
+            log.info("JOAL is ready");
+        } catch (final Exception e) {
+            // Spring closes the context and reports a nonzero exit when initialization fails.
+            throw new IllegalStateException("JOAL failed to initialize", e);
         }
     }
 

@@ -1,6 +1,7 @@
 package org.araymond.joal.core.ttorrent.client;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -20,6 +21,19 @@ import static org.mockito.Mockito.*;
  * Created by raymo on 16/07/2017.
  */
 public class ConnectionHandlerTest {
+
+    private final java.util.List<ConnectionHandler> handlers = new java.util.ArrayList<>();
+
+    private ConnectionHandler newHandler() {
+        final ConnectionHandler handler = Mockito.spy(new ConnectionHandler());
+        handlers.add(handler);
+        return handler;
+    }
+
+    @AfterEach
+    void closeHandlers() {
+        handlers.forEach(ConnectionHandler::close);
+    }
 
     public static ConnectionHandler createMockedIpv4(final int port) {
         try {
@@ -57,7 +71,7 @@ public class ConnectionHandlerTest {
     public void shouldFallbackToLocalhostIfFailedToFetchAndNoIpWereNeverFetched() throws IOException {
         final ServerSocketChannel channel = createMockedServerSocketChannel(49152);
 
-        final ConnectionHandler handler = Mockito.spy(new ConnectionHandler());
+        final ConnectionHandler handler = newHandler();
         doReturn(Optional.empty()).when(handler).tryToFetchFromProviders();
         doReturn(channel).when(handler).bindToPort();
 
@@ -68,7 +82,7 @@ public class ConnectionHandlerTest {
     @Test
     public void shouldUseFetchedIpIfSuccessful() throws IOException {
         final ServerSocketChannel channel = createMockedServerSocketChannel(49152);
-        final ConnectionHandler handler = Mockito.spy(new ConnectionHandler());
+        final ConnectionHandler handler = newHandler();
         doReturn(channel).when(handler).bindToPort();
         doReturn(Optional.of(InetAddress.getByName("168.168.168.168"))).when(handler).tryToFetchFromProviders();
 
@@ -80,7 +94,7 @@ public class ConnectionHandlerTest {
     @Test
     public void shouldFillPortAndIpOnInit() throws IOException {
         final ServerSocketChannel channel = createMockedServerSocketChannel(65534);
-        final ConnectionHandler handler = Mockito.spy(new ConnectionHandler());
+        final ConnectionHandler handler = newHandler();
         doReturn(channel).when(handler).bindToPort();
         doReturn(Optional.of(InetAddress.getByName("168.168.168.168"))).when(handler).tryToFetchFromProviders();
 
@@ -112,9 +126,13 @@ public class ConnectionHandlerTest {
         ServerSocket serverSocket = null;
         ServerSocketChannel serverSocketChannel = null;
         try {
-            serverSocket = new ServerSocket(ConnectionHandler.PORT_RANGE_START);
+            try {
+                serverSocket = new ServerSocket(ConnectionHandler.PORT_RANGE_START);
+            } catch (java.net.BindException alreadyOccupied) {
+                // An existing local listener also satisfies this test's occupied-port precondition.
+            }
             serverSocketChannel = new ConnectionHandler().bindToPort();
-            assertThat(serverSocketChannel.socket().getLocalPort()).isBetween(ConnectionHandler.PORT_RANGE_START, ConnectionHandler.PORT_RANGE_END);
+            assertThat(serverSocketChannel.socket().getLocalPort()).isBetween(ConnectionHandler.PORT_RANGE_START + 1, ConnectionHandler.PORT_RANGE_END);
         } catch (final IOException e) {
             fail("should not have failed", e);
         } finally {
@@ -131,7 +149,7 @@ public class ConnectionHandlerTest {
 
     @Test
     public void shouldCallProvidersOneByOneUntilOneReturnsIp() throws IOException {
-        final ConnectionHandler handler = Mockito.spy(new ConnectionHandler());
+        final ConnectionHandler handler = newHandler();
         doThrow(new IOException("hehe :) you won't get it on first try"))
                 .doReturn(InetAddress.getByName("168.168.168.168"))
                 .when(handler).readIpFromProvider(ArgumentMatchers.anyString());
@@ -143,7 +161,7 @@ public class ConnectionHandlerTest {
 
     @Test
     public void shouldFallBackToLocalHostIfNoProviderAreReachable() throws IOException {
-        final ConnectionHandler handler = Mockito.spy(new ConnectionHandler());
+        final ConnectionHandler handler = newHandler();
         doThrow(new IOException("hehe :) you won't get it on first try"))
                 .when(handler).readIpFromProvider(ArgumentMatchers.anyString());
 
@@ -153,7 +171,7 @@ public class ConnectionHandlerTest {
 
     @Test
     public void shouldReuseLastKnownAddressIfOneWasAlreadyGotAndNoProviderAreReachable() throws IOException {
-        final ConnectionHandler handler = Mockito.spy(new ConnectionHandler());
+        final ConnectionHandler handler = newHandler();
         doReturn(InetAddress.getByName("168.168.168.168"))
                 .when(handler).readIpFromProvider(ArgumentMatchers.anyString());
         handler.start();
@@ -168,7 +186,7 @@ public class ConnectionHandlerTest {
     public void shouldCloseChannelOnStop() throws IOException {
         final ServerSocketChannel channel = createMockedServerSocketChannel(49152);
 
-        final ConnectionHandler handler = Mockito.spy(new ConnectionHandler());
+        final ConnectionHandler handler = newHandler();
         doReturn(Optional.empty()).when(handler).tryToFetchFromProviders();
         doReturn(channel).when(handler).bindToPort();
 

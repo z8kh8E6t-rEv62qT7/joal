@@ -9,7 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

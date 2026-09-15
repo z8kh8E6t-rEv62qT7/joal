@@ -2,7 +2,6 @@ package org.araymond.joal.web.services.corelistener;
 
 import lombok.extern.slf4j.Slf4j;
 import org.araymond.joal.core.events.speed.SeedingSpeedsHasChangedEvent;
-import org.araymond.joal.web.annotations.ConditionalOnWebUi;
 import org.araymond.joal.web.messages.outgoing.impl.speed.SeedingSpeedHasChangedPayload;
 import org.araymond.joal.web.services.JoalMessageSendingTemplate;
 import org.springframework.context.event.EventListener;
@@ -10,12 +9,11 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Created by raymo on 25/06/2017.
  */
-@ConditionalOnWebUi
 @Service
 @Slf4j
 public class WebSpeedEventListener extends WebEventListener {

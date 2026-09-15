@@ -1,8 +1,7 @@
 package org.araymond.joal.web.config.security.websocket.services;
 
 import org.apache.commons.lang3.StringUtils;
-import org.araymond.joal.web.annotations.ConditionalOnWebUi;
-import org.springframework.beans.factory.annotation.Value;
+import org.araymond.joal.web.config.WebUiSettings;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,13 +14,12 @@ import java.util.Collections;
 /**
  * Created by raymo on 30/07/2017.
  */
-@ConditionalOnWebUi
 @Component
 public class WebSocketAuthenticatorService {
-    private final String appSecretToken;
+    private final WebUiSettings settings;
 
-    public WebSocketAuthenticatorService(@Value("${joal.ui.secret-token}") final String appSecretToken) {
-        this.appSecretToken = appSecretToken;
+    public WebSocketAuthenticatorService(final WebUiSettings settings) {
+        this.settings = settings;
     }
 
     // This method must return a UsernamePasswordAuthenticationToken, another component in the security chain is testing it with 'instanceof'
@@ -33,7 +31,7 @@ public class WebSocketAuthenticatorService {
         if (StringUtils.isBlank(authToken)) {
             throw new AuthenticationCredentialsNotFoundException("Authentication token was null or empty.");
         }
-        if (!appSecretToken.contentEquals(authToken)) {
+        if (!settings.enabled() || !settings.secretToken().contentEquals(authToken)) {
             throw new BadCredentialsException("Authentication token does not match the expected token");
         }
 

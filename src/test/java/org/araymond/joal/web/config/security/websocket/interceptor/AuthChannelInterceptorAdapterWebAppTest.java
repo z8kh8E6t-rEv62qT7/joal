@@ -7,19 +7,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -30,6 +29,7 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest(
         classes = {
+                org.araymond.joal.web.config.WebUiSettings.class,
                 AuthChannelInterceptorAdapter.class,
                 WebSocketConfig.class,
                 org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration.class,
@@ -83,7 +83,7 @@ public class AuthChannelInterceptorAdapterWebAppTest {
         stompHeaders.add(AuthChannelInterceptorAdapter.USERNAME_HEADER, "john");
         stompHeaders.add(AuthChannelInterceptorAdapter.TOKEN_HEADER, TestConstant.UI_SECRET_TOKEN);
 
-        stompClient.connect("ws://localhost:" + port + "/" + TestConstant.UI_PATH_PREFIX, new WebSocketHttpHeaders(), stompHeaders, new StompSessionHandlerAdapter() {
+        stompClient.connectAsync("ws://localhost:" + port + "/" + TestConstant.UI_PATH_PREFIX, new WebSocketHttpHeaders(), stompHeaders, new StompSessionHandlerAdapter() {
         }).get(10, TimeUnit.SECONDS);
 
         verify(authenticatorService, times(1)).getAuthenticatedOrFail("john", TestConstant.UI_SECRET_TOKEN);

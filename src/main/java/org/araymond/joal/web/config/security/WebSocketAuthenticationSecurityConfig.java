@@ -1,7 +1,6 @@
 package org.araymond.joal.web.config.security;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.araymond.joal.web.annotations.ConditionalOnWebUi;
 import org.araymond.joal.web.config.security.websocket.interceptor.AuthChannelInterceptorAdapter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -11,12 +10,11 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Created by raymo on 30/07/2017.
  */
-@ConditionalOnWebUi
 @Configuration
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class WebSocketAuthenticationSecurityConfig implements WebSocketMessageBrokerConfigurer {

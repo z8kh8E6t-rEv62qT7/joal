@@ -8,7 +8,7 @@ import org.araymond.joal.core.events.config.ConfigHasBeenLoadedEvent;
 import org.araymond.joal.core.events.config.ConfigurationIsInDirtyStateEvent;
 import org.springframework.context.ApplicationEventPublisher;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;

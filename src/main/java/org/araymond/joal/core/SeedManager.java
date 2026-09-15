@@ -115,7 +115,6 @@ public class SeedManager {
         this.httpClient = HttpClients.custom()
                 .setConnectionTimeToLive(1, TimeUnit.MINUTES)
                 .setConnectionManager(connManager)
-                .setConnectionManagerShared(true)
                 .setDefaultRequestConfig(requestConf)
                 .build();
     }
@@ -131,6 +130,11 @@ public class SeedManager {
         if (this.client != null) {
             this.client.stop();
             this.client = null;
+        }
+        try {
+            this.httpClient.close();
+        } catch (final IOException e) {
+            log.warn("Failed to close tracker HTTP client", e);
         }
     }
 

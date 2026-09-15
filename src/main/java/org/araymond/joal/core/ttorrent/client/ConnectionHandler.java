@@ -65,7 +65,7 @@ public class ConnectionHandler {
 
         // TODO: use @Scheduled
         this.ipFetcherThread = new Thread(() -> {
-            while (this.ipFetcherThread == null || !this.ipFetcherThread.isInterrupted()) {
+            while (!Thread.currentThread().isInterrupted()) {
                 try {
                     MINUTES.sleep(90);  // TODO: move to config
                     this.ipAddress = this.fetchIp();
@@ -73,9 +73,10 @@ public class ConnectionHandler {
                     log.warn("Failed to fetch external IP", e);
                 } catch (final InterruptedException e) {
                     log.info("IP fetcher thread has been stopped");
+                    Thread.currentThread().interrupt();
                 }
             }
-        });
+        }, "external-ip-fetcher");
 
         this.ipFetcherThread.start();
     }
@@ -103,6 +104,8 @@ public class ConnectionHandler {
             urlConnection = new URL(providerUrl).openConnection();
         }
 
+        urlConnection.setConnectTimeout(5000);
+        urlConnection.setReadTimeout(5000);
         urlConnection.setRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36");  // TODO: move to config
         try (final BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), Charsets.UTF_8))) {
             return InetAddress.getByName(in.readLine());
@@ -120,6 +123,9 @@ public class ConnectionHandler {
         Collections.shuffle(shuffledList);
 
         for (final String ipProviderUrl : shuffledList) {
+            if (Thread.currentThread().isInterrupted()) {
+                return Optional.empty();
+            }
             log.info("Fetching ip from {}", ipProviderUrl);
             try {
                 return Optional.of(this.readIpFromProvider(ipProviderUrl));
@@ -191,6 +197,11 @@ public class ConnectionHandler {
         try {
             if (this.ipFetcherThread != null) {
                 this.ipFetcherThread.interrupt();
+                try {
+                    this.ipFetcherThread.join(11000);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
         } finally {
             this.ipFetcherThread = null;

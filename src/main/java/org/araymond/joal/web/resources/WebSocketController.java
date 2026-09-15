@@ -12,7 +12,6 @@ import org.araymond.joal.core.events.speed.SeedingSpeedsHasChangedEvent;
 import org.araymond.joal.core.events.torrent.files.TorrentFileAddedEvent;
 import org.araymond.joal.core.torrent.torrent.InfoHash;
 import org.araymond.joal.core.torrent.torrent.MockedTorrent;
-import org.araymond.joal.web.annotations.ConditionalOnWebUi;
 import org.araymond.joal.web.messages.incoming.config.Base64TorrentIncomingMessage;
 import org.araymond.joal.web.messages.incoming.config.ConfigIncomingMessage;
 import org.araymond.joal.web.messages.outgoing.StompMessage;
@@ -29,7 +28,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +37,6 @@ import java.util.Map;
 /**
  * Created by raymo on 28/07/2017.
  */
-@ConditionalOnWebUi
 @Controller
 @Slf4j
 public class WebSocketController {

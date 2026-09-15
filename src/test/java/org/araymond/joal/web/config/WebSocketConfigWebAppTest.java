@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -27,6 +27,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest(
         classes = {
+                org.araymond.joal.web.config.WebUiSettings.class,
                 WebSocketConfig.class,
                 org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration.class,
                 org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration.class,
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.*;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "spring.main.web-environment=true",
+                "joal.ui.secret-token=test-token",
                 "joal.ui.path.prefix=" + TestConstant.UI_PATH_PREFIX
         }
 )
@@ -120,7 +122,7 @@ public class WebSocketConfigWebAppTest {
     public void shouldBeAbleToConnectToAppPrefix() throws InterruptedException, ExecutionException, TimeoutException {
         final WebSocketStompClient stompClient = new WebSocketStompClient(new StandardWebSocketClient());
 
-        final StompSession stompSession = stompClient.connect("ws://localhost:" + port + "/" + TestConstant.UI_PATH_PREFIX, new StompSessionHandlerAdapter() {
+        final StompSession stompSession = stompClient.connectAsync("ws://localhost:" + port + "/" + TestConstant.UI_PATH_PREFIX, new StompSessionHandlerAdapter() {
         }).get(1000, TimeUnit.SECONDS);
 
         assertThat(stompSession.isConnected()).isTrue();
@@ -131,7 +133,7 @@ public class WebSocketConfigWebAppTest {
         final WebSocketStompClient stompClient = new WebSocketStompClient(new StandardWebSocketClient());
 
         assertThatThrownBy(() ->
-                stompClient.connect("ws://localhost:" + port + "/", new StompSessionHandlerAdapter() {
+                stompClient.connectAsync("ws://localhost:" + port + "/", new StompSessionHandlerAdapter() {
                 }).get(1000, TimeUnit.SECONDS)
         )
                 .isInstanceOf(ExecutionException.class)
@@ -142,7 +144,7 @@ public class WebSocketConfigWebAppTest {
     public void shouldMapDestinationToMessageMappingWithDestinationPrefix() throws InterruptedException, ExecutionException, TimeoutException {
         final WebSocketStompClient stompClient = new WebSocketStompClient(new StandardWebSocketClient());
 
-        final StompSession stompSession = stompClient.connect("ws://localhost:" + port + "/" + TestConstant.UI_PATH_PREFIX, new StompSessionHandlerAdapter() {
+        final StompSession stompSession = stompClient.connectAsync("ws://localhost:" + port + "/" + TestConstant.UI_PATH_PREFIX, new StompSessionHandlerAdapter() {
         }).get(10, TimeUnit.SECONDS);
 
         stompSession.send("/joal/global", null);
@@ -165,7 +167,7 @@ public class WebSocketConfigWebAppTest {
     public void shouldNotMapDestinationToMessageMappingWithoutDestinationPrefix() throws InterruptedException, ExecutionException, TimeoutException {
         final WebSocketStompClient stompClient = new WebSocketStompClient(new StandardWebSocketClient());
 
-        final StompSession stompSession = stompClient.connect("ws://localhost:" + port + "/" + TestConstant.UI_PATH_PREFIX, new StompSessionHandlerAdapter() {
+        final StompSession stompSession = stompClient.connectAsync("ws://localhost:" + port + "/" + TestConstant.UI_PATH_PREFIX, new StompSessionHandlerAdapter() {
         }).get(10, TimeUnit.SECONDS);
 
         stompSession.send("/global", null);

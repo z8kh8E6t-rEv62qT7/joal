@@ -1,25 +1,20 @@
 package org.araymond.joal.web.config.security;
 
-import org.araymond.joal.web.annotations.ConditionalOnWebUi;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
-import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
+import org.springframework.messaging.simp.config.ChannelRegistration;
+import org.springframework.security.messaging.access.intercept.AuthorizationChannelInterceptor;
+import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
+import org.springframework.security.messaging.context.SecurityContextChannelInterceptor;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-/**
- * Created by raymo on 22/06/2017.
- */
-@ConditionalOnWebUi
-@Configuration
-public class WebSocketAuthorizationSecurityConfig extends AbstractSecurityWebSocketMessageBrokerConfigurer {
-
+@Configuration(proxyBeanMethods = false)
+public class WebSocketAuthorizationSecurityConfig implements WebSocketMessageBrokerConfigurer {
     @Override
-    protected void configureInbound(final MessageSecurityMetadataSourceRegistry messages) {
-        messages.anyMessage().authenticated();
-    }
-
-    // TODO : Add CSRF token support: https://docs.spring.io/spring-security/site/docs/current/reference/html/websocket.html#websocket-sameorigin-csrf
-    @Override
-    protected boolean sameOriginDisabled() {
-        return true;
+    public void configureClientInboundChannel(final ChannelRegistration registration) {
+        final var authorization = MessageMatcherDelegatingAuthorizationManager.builder()
+                .anyMessage().authenticated().build();
+        // Token authentication runs first. Preserve the STOMP protocol without CSRF headers.
+        registration.interceptors(new SecurityContextChannelInterceptor(),
+                new AuthorizationChannelInterceptor(authorization));
     }
 }

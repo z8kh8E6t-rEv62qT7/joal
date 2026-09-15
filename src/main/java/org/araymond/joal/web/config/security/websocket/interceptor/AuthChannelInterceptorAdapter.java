@@ -1,6 +1,5 @@
 package org.araymond.joal.web.config.security.websocket.interceptor;
 
-import org.araymond.joal.web.annotations.ConditionalOnWebUi;
 import org.araymond.joal.web.config.security.websocket.services.WebSocketAuthenticatorService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -12,12 +11,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Created by raymo on 30/07/2017.
  */
-@ConditionalOnWebUi
 @Component
 public class AuthChannelInterceptorAdapter implements ChannelInterceptor {
     static final String USERNAME_HEADER = "X-Joal-Username";

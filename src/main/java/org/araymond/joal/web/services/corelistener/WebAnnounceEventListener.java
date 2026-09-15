@@ -5,7 +5,6 @@ import org.araymond.joal.core.events.announce.FailedToAnnounceEvent;
 import org.araymond.joal.core.events.announce.SuccessfullyAnnounceEvent;
 import org.araymond.joal.core.events.announce.TooManyAnnouncesFailedEvent;
 import org.araymond.joal.core.events.announce.WillAnnounceEvent;
-import org.araymond.joal.web.annotations.ConditionalOnWebUi;
 import org.araymond.joal.web.messages.outgoing.impl.announce.FailedToAnnouncePayload;
 import org.araymond.joal.web.messages.outgoing.impl.announce.SuccessfullyAnnouncePayload;
 import org.araymond.joal.web.messages.outgoing.impl.announce.TooManyAnnouncesFailedPayload;
@@ -16,12 +15,11 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Created by raymo on 25/06/2017.
  */
-@ConditionalOnWebUi
 @Service
 @Slf4j
 public class WebAnnounceEventListener extends WebEventListener {

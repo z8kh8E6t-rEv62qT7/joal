@@ -1,7 +1,6 @@
 package org.araymond.joal.web.config.security.websocket.services;
 
 import org.araymond.joal.TestConstant;
-import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,7 +14,7 @@ public class WebSocketAuthenticatorServiceTest {
 
     @Test
     public void shouldThrowExceptionOnNullOrEmptyUsername() {
-        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(TestConstant.UI_SECRET_TOKEN);
+        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(new org.araymond.joal.web.config.WebUiSettings(true, TestConstant.UI_PATH_PREFIX, TestConstant.UI_SECRET_TOKEN, false));
         assertThatThrownBy(() -> authService.getAuthenticatedOrFail("         ", TestConstant.UI_SECRET_TOKEN))
                 .isInstanceOf(AuthenticationCredentialsNotFoundException.class)
                 .hasMessageContaining("Username");
@@ -31,7 +30,7 @@ public class WebSocketAuthenticatorServiceTest {
 
     @Test
     public void shouldThrowExceptionOnNullOrEmptyToken() {
-        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(TestConstant.UI_SECRET_TOKEN);
+        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(new org.araymond.joal.web.config.WebUiSettings(true, TestConstant.UI_PATH_PREFIX, TestConstant.UI_SECRET_TOKEN, false));
         assertThatThrownBy(() -> authService.getAuthenticatedOrFail("john", "         "))
                 .isInstanceOf(AuthenticationCredentialsNotFoundException.class)
                 .hasMessageContaining("Authentication token");
@@ -47,7 +46,7 @@ public class WebSocketAuthenticatorServiceTest {
 
     @Test
     public void shouldThrowExceptionIfTokenDoesNotMatches() {
-        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(TestConstant.UI_SECRET_TOKEN);
+        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(new org.araymond.joal.web.config.WebUiSettings(true, TestConstant.UI_PATH_PREFIX, TestConstant.UI_SECRET_TOKEN, false));
         assertThatThrownBy(() -> authService.getAuthenticatedOrFail("john", "nop"))
                 .isInstanceOf(BadCredentialsException.class)
                 .hasMessageContaining("Authentication token does not match");
@@ -55,7 +54,7 @@ public class WebSocketAuthenticatorServiceTest {
 
     @Test
     public void shouldReturnAuthenticationTokenOnSuccess() {
-        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(TestConstant.UI_SECRET_TOKEN);
+        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(new org.araymond.joal.web.config.WebUiSettings(true, TestConstant.UI_PATH_PREFIX, TestConstant.UI_SECRET_TOKEN, false));
 
         final UsernamePasswordAuthenticationToken authToken = authService.getAuthenticatedOrFail("john", TestConstant.UI_SECRET_TOKEN);
 
@@ -65,7 +64,7 @@ public class WebSocketAuthenticatorServiceTest {
     @Test
     public void shouldReturnInstanceOfUsernamePasswordAuthenticationTokenOnSuccess() {
         // This is not a useless test, Spring security chain test if the instance of the returned AuthToken is UsernamePasswordAuthenticationToken
-        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(TestConstant.UI_SECRET_TOKEN);
+        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(new org.araymond.joal.web.config.WebUiSettings(true, TestConstant.UI_PATH_PREFIX, TestConstant.UI_SECRET_TOKEN, false));
 
         final UsernamePasswordAuthenticationToken authToken = authService.getAuthenticatedOrFail("john", TestConstant.UI_SECRET_TOKEN);
 
@@ -75,7 +74,7 @@ public class WebSocketAuthenticatorServiceTest {
     @Test
     public void shouldDefineAtLeastOneGrantedAuthorityOnSuccess() {
         // This is not a useless test, Spring security chain test if there is at least one granted authority, if there is none, we are considered as non authenticated
-        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(TestConstant.UI_SECRET_TOKEN);
+        final WebSocketAuthenticatorService authService = new WebSocketAuthenticatorService(new org.araymond.joal.web.config.WebUiSettings(true, TestConstant.UI_PATH_PREFIX, TestConstant.UI_SECRET_TOKEN, false));
 
         final UsernamePasswordAuthenticationToken authToken = authService.getAuthenticatedOrFail("john", TestConstant.UI_SECRET_TOKEN);
 

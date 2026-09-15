@@ -1,7 +1,5 @@
 package org.araymond.joal.web.config;
 
-import org.araymond.joal.web.annotations.ConditionalOnWebUi;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -9,20 +7,17 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
-import javax.inject.Inject;
 
 /**
  * Created by raymo on 22/06/2017.
  */
-@ConditionalOnWebUi
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-    private final String webSocketPathPrefix;
+    private final WebUiSettings settings;
 
-    @Inject
-    public WebSocketConfig(@Value("${joal.ui.path.prefix}") final String webSocketPathPrefix) {
-        this.webSocketPathPrefix = webSocketPathPrefix;
+    public WebSocketConfig(final WebUiSettings settings) {
+        this.settings = settings;
     }
 
     @Override
@@ -48,8 +43,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     // Handshake endpoint
     @Override
     public void registerStompEndpoints(final StompEndpointRegistry registry) {
-        registry.addEndpoint(this.webSocketPathPrefix)
-                .setAllowedOrigins("*");
+        // The fixed WebSocket infrastructure needs a protocol handler even with HTTP disabled.
+        // In that mode no connector listens, and the request filter denies every path.
+        registry.addEndpoint(settings.enabled() ? settings.endpoint() : "/").setAllowedOrigins("*");
     }
 
 }

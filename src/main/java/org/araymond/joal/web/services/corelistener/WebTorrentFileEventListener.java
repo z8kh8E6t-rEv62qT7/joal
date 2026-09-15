@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.araymond.joal.core.events.torrent.files.FailedToAddTorrentFileEvent;
 import org.araymond.joal.core.events.torrent.files.TorrentFileAddedEvent;
 import org.araymond.joal.core.events.torrent.files.TorrentFileDeletedEvent;
-import org.araymond.joal.web.annotations.ConditionalOnWebUi;
 import org.araymond.joal.web.messages.outgoing.impl.files.FailedToAddTorrentFilePayload;
 import org.araymond.joal.web.messages.outgoing.impl.files.TorrentFileAddedPayload;
 import org.araymond.joal.web.messages.outgoing.impl.files.TorrentFileDeletedPayload;
@@ -14,12 +13,11 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Created by raymo on 11/07/2017.
  */
-@ConditionalOnWebUi
 @Service
 @Slf4j
 public class WebTorrentFileEventListener extends WebEventListener {
